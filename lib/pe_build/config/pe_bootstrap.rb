@@ -44,6 +44,13 @@ class PEBuild::Config::PEBootstrap < PEBuild::Config::Global
   #
   attr_accessor :autosign
 
+  # @!attribute foreground
+  #   @return [TrueClass, FalseClass] if initial agent run will be in the
+  #                                   foreground instead of scheduled with at.
+  #   @since 0.1.0
+  attr_accessor :foreground
+
+
   # @api private
   VALID_AUTOSIGN_VALUES = [TrueClass, FalseClass, Array]
 
@@ -53,6 +60,7 @@ class PEBuild::Config::PEBootstrap < PEBuild::Config::Global
     @verbose     = UNSET_VALUE
     @master      = UNSET_VALUE
     @answer_file = UNSET_VALUE
+    @foreground  = UNSET_VALUE
 
     @relocate_manifests = UNSET_VALUE
 
@@ -72,6 +80,7 @@ class PEBuild::Config::PEBootstrap < PEBuild::Config::Global
     set_default :@master,      'master'
     set_default :@answer_file, nil
     set_default :@autosign,    (@role == :master)
+    set_default :@foreground,  false
 
     set_default :@relocate_manifests, false
 
@@ -96,6 +105,7 @@ class PEBuild::Config::PEBootstrap < PEBuild::Config::Global
     validate_answer_file(errors, machine)
     validate_relocate_manifests(errors, machine)
     validate_autosign(errors, machine)
+    validate_foreground(errors, machine)
 
     errors |= h.values.flatten
     {"PE Bootstrap" => errors}
@@ -118,6 +128,15 @@ class PEBuild::Config::PEBootstrap < PEBuild::Config::Global
       errors << I18n.t(
         'pebuild.config.pe_bootstrap.errors.malformed_verbose',
         :verbose => @verbose.inspect,
+      )
+    end
+  end
+
+  def validate_foreground(errors, machine)
+    unless @foreground == !!@foreground
+      errors << I18n.t(
+        'pebuild.config.pe_bootstrap.errors.malformed_foreground',
+        :foreground => @foreground.inspect,
       )
     end
   end

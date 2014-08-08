@@ -27,7 +27,10 @@ class PEBuild::Cap::RunInstall::POSIX
     on_machine(machine, argv)
 
 
-    if machine.communicate.test('which at')
+    if attr(:foreground)
+      machine.ui.info I18n.t('pebuild.cap.run_install.starting_foreground_run')
+      machine.communicate.sudo("/opt/puppet/bin/puppet agent -t --waitforcert 10")
+    elsif machine.communicate.test('which at')
       machine.ui.info I18n.t('pebuild.cap.run_install.scheduling_run')
       machine.communicate.sudo("echo '/opt/puppet/bin/puppet agent -t --waitforcert 10' | at now '+ 1min'")
     end
